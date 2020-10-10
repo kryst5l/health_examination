@@ -1,0 +1,201 @@
+# -*- coding: utf-8 -*-
+# @Time    : 2020/9/24 15:41
+# @Author  : liujian
+# description : 健康检查
+# input : 输入linux的命令
+# output : 返回对应的集群状态或者进程存活的状态
+
+import os
+import commands
+import re
+
+
+def es_cluster_examination():
+    """
+    es集群有四套：运维平台日志 运维平台指标 运维中心日志  运维中心指标
+    通过返回的状态 "green" 以及 node节点数来判断 每套集群是否健康
+    "green"就说明
+    :return: status:green  nodes:10
+    """
+    print("start es_cluster_examination")
+    print("*"*50)
+    status1,info1 = commands.getstatusoutput("curl http://10.209.33.68:9211/_cluster/health?pretty")
+
+    if ('green' and '"number_of_nodes":10') in info1:
+        print("platform-sla-ararm examination is OK")
+    else:
+        print("请检查运维平台指标的健康状态")
+
+    status2, info2 = commands.getstatusoutput("curl http://10.209.32.188:9212/_cluster/health?pretty")
+    if ('green' and '"number_of_nodes":10') in info2:
+        print("platform-log examination is OK")
+    else:
+        print("请检查运维平台日志的健康状态")
+
+    status3, info3 = commands.getstatusoutput("curl http://10.209.32.250:9211/_cluster/health?pretty")
+    if ('green' and '"number_of_nodes":10') in info3:
+        print("center-sla-ararm examination is OK")
+    else:
+        print("请检查运维中心指标的健康状态")
+
+    status4, info4 = commands.getstatusoutput("curl http://10.209.33.133:9212/_cluster/health?pretty")
+    if ('green' and '"number_of_nodes":10') in info4:
+        print("center-log examination is OK")
+    else:
+        print("请检查运维中心日志的健康状态")
+
+    print("start es_cluster_examination")
+    print("*"*50)
+
+
+def es_index_examination():
+    """
+    同理也是检查es四套集群的状态，通过查看集群里面的索引的健康状态是否为‘green’
+    以及node节点数是否为10
+    :return:
+    """
+    print("start es_cluster_examination")
+    print("*"*50)
+    status18,info18 = commands.getstatusoutput("curl http://10.209.33.68:9211/_cluster/health/metric.ops200920?pretty")
+
+    if ('green' and '"number_of_nodes":10') in info18:
+        print("platform-sla-ararm examination is OK")
+    else:
+        print("请检查运维平台指标的健康状态")
+
+    status19, info19 = commands.getstatusoutput("curl http://10.209.32.188:9212/_cluster/health/metric.ops200920?pretty")
+    if ('green' and '"number_of_nodes":10') in info19:
+        print("platform-log examination is OK")
+    else:
+        print("请检查运维平台日志的健康状态")
+
+    status20, info20 = commands.getstatusoutput("curl http://10.209.32.250:9211/_cluster/health/metric.ops200920?pretty")
+    if ('green' and '"number_of_nodes":10') in info20:
+        print("center-sla-ararm examination is OK")
+    else:
+        print("请检查运维中心指标的健康状态")
+
+    status21, info21 = commands.getstatusoutput("curl http://10.209.33.133:9212/_cluster/health/metric.ops200920?pretty")
+    if ('green' and '"number_of_nodes":10') in info21:
+        print("platform-log examination is OK")
+    else:
+        print("请检查运维中心日志的健康状态")
+
+    print("start es_cluster_examination")
+    print("*"*50)
+
+
+def redis_server_examination():
+    """
+    redis集群有三台，提供两种检测的方式 1：主要是检查进程是否存在，
+    2：也可以通过查看主从节点看集群状态
+    redis 可以通过  进入主机的方式 然后去查看里面的信息
+    '''ssh 10.209.33.155 "redis-cli -h 10.209.33.155 -a 'xxx' (密码)info"'''
+    :return: redis-server的进程存在状态
+    """
+    print("*" * 50)
+    print("start redis-server examination")
+    status5,info5 = commands.getstatusoutput("ssh 10.209.32.162 'ps -ef |grep redis-server|grep -v grep'")
+    print(info5)
+
+    status6, info6 = commands.getstatusoutput("ssh 10.209.32.229 'ps -ef |grep redis-server|grep -v grep'")
+    print(info6)
+
+    status7, info7 = commands.getstatusoutput("ssh 10.209.33.155 'ps -ef |grep redis-server|grep -v grep'")
+    print(info7)
+    print("end redis-server examination")
+    print("*" * 50)
+
+
+def zookeeper_examination():
+    """
+    zookeeper 有三台，有一台leader,两台follower,看三台机器的状态，如果存在 就证明是状态是健康的
+    :return: zookeeper的Mode 是一台leader和两台follower
+    """
+    print("*" * 50)
+    print("start zookeeper_examination")
+    status8,info8 = commands.getstatusoutput("ssh 10.209.32.149 ./data/apps/zookeeper-3.5.5/bin/zkServer.sh status")
+    print(info8)
+    status9, info9 = commands.getstatusoutput("ssh 10.209.32.176 ./data/apps/zookeeper-3.5.5/bin/zkServer.sh status")
+    print(info9)
+    status10, info10 = commands.getstatusoutput("ssh 10.209.33.130 ./data/apps/zookeeper-3.5.5/bin/zkServer.sh status")
+    print(info10)
+    print("start zookeeper_examination")
+    print("*" * 50)
+
+
+def nginx_server_examination():
+    """
+    nginx有四台机器，检查所在主机的进程存在情况
+    :return:
+    """
+    print("*" * 50)
+    print("start nginx_server_examination")
+    status11, info11 = commands.getstatusoutput("ssh 10.209.32.165 'ps -ef |grep nginx |grep -v grep '")
+    print(info11)
+    status12, info12 = commands.getstatusoutput("ssh 10.209.32.234 'ps -ef |grep nginx |grep -v grep '")
+    print(info12)
+    status13, info13 = commands.getstatusoutput("ssh 10.209.32.191 'ps -ef |grep nginx |grep -v grep '")
+    print(info13)
+    status14, info14 = commands.getstatusoutput("ssh 10.209.33.83 'ps -ef |grep nginx |grep -v grep '")
+    print(info14)
+    print("end nginx_server_examination")
+    print("*" * 50)
+
+
+def mysql_server_examination():
+    """
+    1:输入一台mysql的Ip 用户 密码 等 进入mysql里面 显示状态 master或者slave
+    2：显示当前的 master和slave节点的连接数
+    :return: master  slave 以及当前master和slave节点的连接数
+    """
+    print("*" * 50)
+    print("start mysql-server examination")
+    status15,info15 = commands.getstatusoutput('''ssh 10.209.32.254 "/home/db/mysql/product/bin/mysql -uroot -pMysql_2019 -Bse 'show master status';"''')
+    thread_status_1, thread_num_1 = commands.getstatusoutput('''ssh 10.209.32.254 "/home/db/mysql/product/bin/mysql -uroot -pMysql_2019 -Bse 'status';"''')
+    print(info15)
+    print(thread_num_1)
+    print("*"*50)
+    status16, info16 = commands.getstatusoutput('''ssh 10.209.33.69 "/home/db/mysql/product/bin/mysql -uroot -pMysql_2019 -Bse 'show master status';"''')
+    thread_status_2, thread_num_2 = commands.getstatusoutput('''ssh 10.209.33.69 "/home/db/mysql/product/bin/mysql -uroot -pMysql_2019 -Bse 'status';"''')
+    print(info16)
+    print(thread_num_2)
+    print("*" * 50)
+    status17, info17 = commands.getstatusoutput('''ssh 10.209.33.6 "/home/db/mysql/product/bin/mysql -uroot -pMysql_2019 -Bse 'show master status';"''')
+    thread_status_3, thread_num_3 = commands.getstatusoutput('''ssh 10.209.32.254 "/home/db/mysql/product/bin/mysql -uroot -pMysql_2019 -Bse 'status';"''')
+    print(info17)
+    print(thread_num_3)
+    print("*" * 50)
+    print("end mysql-server examination")
+    print("*"*50)
+
+
+def sla_ararm_conn_examination():
+    """
+    sla-ararm告警服务的数据来源是redis和mysql，
+    正常提供服务情况下优先获取redis的数据，当redis异常时候从mysql拉取数据
+    在sla-ararm主机下使用nc命令检测对应的redis和mysql对应节点的端口是否开放
+    :return:
+    """
+    print("当redis和mysql的集群健康检查正常的情况，进行sla-ararm告警服务的连接性检测")
+
+
+def filebeat_examination():
+    """
+    filebeat的检测 读取装有filebeat的主机 然后去ps-ef查看进程是否存在
+    :return:
+    """
+    pass
+
+
+if __name__ == '__main__':
+    es_cluster_examination()
+    redis_server_examination()
+    zookeeper_examination()
+    nginx_server_examination()
+    mysql_server_examination()
+    sla_ararm_conn_examination()
+
+
+
+
