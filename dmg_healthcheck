@@ -1,0 +1,300 @@
+# -*- coding: utf-8 -*-
+# @Time    : 2020/10/28 09:41
+# @Author  : liujian
+# description :
+# input : namespace 作业名
+# output : 检查k8s容器容器endpoint/容器内服务是否异常/虚机服务健康检查结果
+
+
+import os
+import time
+import commands
+
+
+# from elasticsearch import Elasticsearch
+def k8s_standard_examination():
+    """
+    93fb9d4b16aa750c7475b6d601c35c2c     ---标准版
+    97d0145823aeb8ed8060617be62e08bdcc     ---标准版
+    831c2f88a604a07ca94314b56a4921b8     ---标准版
+    :return:
+    """
+    standard_examination_list = ["93fb9d4b16aa750c7475b6d601c35c2c","97d0145823aeb8ed8060617be62e08bdcc","831c2f88a604a07ca94314b56a4921b8"]
+    tenants_id_dict = {"93fb9d4b16aa750c7475b6d601c35c2c":"1317","97d0145823aeb8ed8060617be62e08bdcc":"1676","831c2f88a604a07ca94314b56a4921b8":"1627"}
+    print("-------数据管理容器内健康检查（标准版）-------")
+    for i in standard_examination_list:
+        for i in standard_examination_list:
+            status1, info1 = commands.getstatusoutput(
+                "ssh 10.209.36.106 'kubectl get pod -n {}|grep metadata-mg | wc -l'".format(i))
+            print(info1)
+            if info1 == str(2):
+                print("租户id{}元数据管理容器副本数正常".format(tenants_id_dict[i]))
+            else:
+                print("租户id{}元数据管理容器副本数是%s,出现了异常".format(tenants_id_dict[i], info1))
+
+            status2, info2 = commands.getstatusoutput(
+                "ssh 10.209.36.106 'kubectl get pod -n {}|grep metadata-query | wc -l'".format(i))
+            if info2 == str(2):
+                print("租户id{}元数据查询容器副本数正常".format(tenants_id_dict[i]))
+            else:
+                print("租户id{}元数据查询容器副本数是%s,出现了异常".format(tenants_id_dict[i], info2))
+
+            status3, info3 = commands.getstatusoutput(
+                "ssh 10.209.36.106 'kubectl get pod -n {}|grep right-mg | wc -l'".format(i))
+            if info3 == str(2):
+                print("租户id{}查询质量规则容器副本数正常".format(tenants_id_dict[i]))
+            else:
+                print("租户id{}查询质量规则容器副本数是{},出现了异常".format(tenants_id_dict[i], info3))
+
+            status4, info4 = commands.getstatusoutput(
+                "ssh 10.209.36.106 'kubectl get pod -n {}|grep right-query | wc -l'".format(i))
+            if info4 == str(2):
+                print("租户id{}查询质量分析容器副本数正常".format(tenants_id_dict[i]))
+            else:
+                print("租户id{}管理质量分析容器副本数是{},出现了异常".format(tenants_id_dict[i], info4))
+
+            print("租户id{}已检查完毕".format(tenants_id_dict[i]))
+
+
+def k8s_enterprise_examination():
+    """
+    选取10.209.36.106 然后获取作业名 kubectl get ns
+    93fb9d4b16aa750c7475b6d601c35c2c    ---标准版
+    11d0e62872002fced83f79975ec59a3a6
+    831c2f88a604a07ca94314b56a4921b8    ---标准版
+    973a5f0ccbc4ee3524ccf035d35b284b
+    8d420fa35754d1f1c19969c88780314d
+    97d0145823aeb8ed8060617be62e08bdcc   ---标准版
+    228499b55310264a8ea0e27b6e7c6ab6
+    aa486f25175cbdc3854151288a645c19
+    79a49b3e3762632813f9e35f4ba53d6c
+    0ce2ffd21fc958d9ef0ee9ba5336e357
+    be3e9d3f7d70537357c67bb3f4086846
+    ab2b41c63853f0a651ba9fbf502b0cd8
+  :return:
+    """
+    print("---------数据管理容器内健康检查---------")
+    standard_examination_list = ["11d0e62872002fced83f79975ec59a3a6","973a5f0ccbc4ee3524ccf035d35b284b","8d420fa35754d1f1c19969c88780314d",
+                                 "228499b55310264a8ea0e27b6e7c6ab6","aa486f25175cbdc3854151288a645c19","79a49b3e3762632813f9e35f4ba53d6c",
+                                 "0ce2ffd21fc958d9ef0ee9ba5336e357","be3e9d3f7d70537357c67bb3f4086846","ab2b41c63853f0a651ba9fbf502b0cd8"]
+
+    tenants_id_dict = {"11d0e62872002fced83f79975ec59a3a6":"1680","973a5f0ccbc4ee3524ccf035d35b284b":"1650","8d420fa35754d1f1c19969c88780314d":"1647",
+                                 "228499b55310264a8ea0e27b6e7c6ab6":"1585","aa486f25175cbdc3854151288a645c19":"1529","79a49b3e3762632813f9e35f4ba53d6c":"1376",
+                                 "0ce2ffd21fc958d9ef0ee9ba5336e357":"1265","be3e9d3f7d70537357c67bb3f4086846":"1651","ab2b41c63853f0a651ba9fbf502b0cd8":"1734"}
+    for i in standard_examination_list:
+        status1, info1 = commands.getstatusoutput(
+            "ssh 10.209.36.106 'kubectl get pod -n {}|grep metadata-mg | wc -l'".format(i))
+        print(info1)
+        if info1 == str(4):
+            print("租户id{}元数据管理容器副本数正常".format(tenants_id_dict[i]))
+        else:
+            print("租户id{}元数据管理容器副本数是%s,出现了异常".format(tenants_id_dict[i],info1))
+
+        status2, info2 = commands.getstatusoutput(
+            "ssh 10.209.36.106 'kubectl get pod -n {}|grep metadata-query | wc -l'".format(i))
+        if info2 == str(4):
+            print("租户id{}元数据查询容器副本数正常".format(tenants_id_dict[i]))
+        else:
+            print("租户id{}元数据查询容器副本数是%s,出现了异常".format(tenants_id_dict[i],info2))
+
+        status3, info3 = commands.getstatusoutput(
+            "ssh 10.209.36.106 'kubectl get pod -n {}|grep quality-rule | wc -l'".format(i))
+        if info3 == str(2):
+            print("租户id{}查询质量规则容器副本数正常".format(tenants_id_dict[i]))
+        else:
+            print("租户id{}查询质量规则容器副本数是{},出现了异常".format(tenants_id_dict[i],info3))
+
+        status4, info4 = commands.getstatusoutput(
+            "ssh 10.209.36.106 'kubectl get pod -n {}|grep quality-analysis | wc -l'".format(i))
+        if info4 == str(4):
+            print("租户id{}查询质量分析容器副本数正常".format(tenants_id_dict[i]))
+        else:
+            print("租户id{}管理质量分析容器副本数是{},出现了异常".format(tenants_id_dict[i],info4))
+
+        status5, info5 = commands.getstatusoutput(
+            "ssh 10.209.36.106 'kubectl get pod -n {}|grep right-mg | wc -l'".format(i))
+        if info5 == str(2):
+            print("租户id{}查询权限管理容器副本数正常".format(tenants_id_dict[i]))
+        else:
+            print("租户id{}查询权限管理容器副本数是{},出现了异常".format(tenants_id_dict[i],info5))
+
+        status6, info6 = commands.getstatusoutput(
+            "ssh 10.209.36.106 'kubectl get pod -n {}|grep right-query | wc -l'".format(i))
+        if info6 == str(4):
+            print("租户{}查询权限查询容器副本数正常".format(tenants_id_dict[i]))
+        else:
+            print("租户{}查询权限查询容器副本数是{},出现了异常".format(tenants_id_dict[i],info6))
+
+        status7, info7 = commands.getstatusoutput(
+            "ssh 10.209.36.106 'kubectl get pod -n {}|grep map-statistic | wc -l'".format(i))
+        if info7 == str(4):
+            print("租户{}查询地图容器副本数正常".format(tenants_id_dict[i]))
+        else:
+            print("租户{}查询地图容器副本数是{},出现了异常".format(tenants_id_dict[i],info7))
+
+        status8, info8 = commands.getstatusoutput(
+            "ssh 10.209.36.106 'kubectl get pod -n {}|grep related-gather | wc -l'".format(i))
+        if info8 == str(4):
+            print("租户{}查询血缘容器副本数正常".format(tenants_id_dict[i]))
+        else:
+            print("租户{}查询血缘容器副本数是{},出现了异常".format(tenants_id_dict[i],info8))
+
+        print("租户id{}已检查完毕".format(tenants_id_dict[i]))
+
+
+def cvm_health_examination():
+    """
+    检查虚拟机上面的
+    地图查询服务/血缘查询服务/kong代理postgre数据库/外联区kong代理
+    是否正常
+    通过ps-ef | grep 看到相关的服务是否存在 不存在及时进行问题查找
+    :return:
+    """
+    print("---------数据管理虚机服务健康检查-----------")
+    status9, info9 = commands.getstatusoutput("ssh 10.209.35.206 'ps -ef |grep data-map-query-web|grep -v grep'")
+    if info9 == "":
+        print("地图虚机10.209.35.206地图查询服务异常")
+    else:
+        print("地图虚机10.209.35.206地图查询服务正常")
+    print('*' * 50)
+
+    status10, info10 = commands.getstatusoutput(
+        "ssh 10.209.33.214 'ps -ef |ps -ef |grep data-map-query-web|grep -v grep'")
+    if info10 == "":
+        print("地图虚机10.209.33.214地图查询服务异常")
+    else:
+        print("地图虚机10.209.33.214地图查询服务正常")
+
+    print('*' * 50)
+
+    status11, info11 = commands.getstatusoutput("ssh 10.209.35.68 'ps -ef |grep related|grep -v grep'")
+    if info11 == "":
+        print("地图血缘10.209.35.68血缘查询服务异常")
+    else:
+        print("地图血缘10.209.35.68血缘查询服务正常")
+    print('*' * 50)
+
+    status12, info12 = commands.getstatusoutput("ssh 10.209.35.131 'ps -ef |grep related|grep -v grep'")
+    if info12 == "":
+        print("地图血缘10.209.35.131血缘查询服务异常")
+    else:
+        print("地图血缘10.209.35.131血缘查询服务正常")
+    print('*' * 50)
+
+    status13, info13 = commands.getstatusoutput("ssh 10.209.36.138 'ps -ef |grep postgres|grep -v grep'")
+    if info13 == "":
+        print("kong代理postgre数据库10.209.36.138服务异常")
+    else:
+        print("kong代理postgre数据库10.209.36.138服务正常")
+    print('*' * 50)
+
+    status14, info14 = commands.getstatusoutput("ssh 10.209.36.51 'ps -ef |grep postgres|grep -v grep'")
+    if info14 == "":
+        print("kong代理postgre数据库10.209.36.51服务异常")
+    else:
+        print("kong代理postgre数据库10.209.36.51服务正常")
+    print('*' * 50)
+
+    status15, info15 = commands.getstatusoutput("ssh 10.209.36.14 'ps -ef |grep postgres|grep -v grep'")
+    if info15 == "":
+        print("kong代理postgre数据库10.209.36.14血缘查询服务异常")
+    else:
+        print("kong代理postgre数据库10.209.36.14血缘查询服务正常")
+    print('*' * 50)
+
+    status16, info16 = commands.getstatusoutput("ssh 10.209.22.15 'ps -ef |grep kong|grep -v grep'")
+    if info16 == "":
+        print("外联区kong代理10.209.22.15服务异常")
+    else:
+        print("外联区kong代理10.209.22.15服务正常")
+    print('*' * 50)
+
+    status17, info17 = commands.getstatusoutput("ssh 10.209.22.22 'ps -ef |grep kong|grep -v grep'")
+    if info17 == "":
+        print("外联区kong代理10.209.22.22服务异常")
+    else:
+        print("外联区kong代理10.209.22.22服务正常")
+    print('*' * 50)
+
+    status18, info18 = commands.getstatusoutput("ssh 10.209.23.28 'ps -ef |grep kong|grep -v grep'")
+    if info18 == "":
+        print("外联区kong代理10.209.23.28服务异常")
+    else:
+        print("外联区kong代理10.209.23.28服务正常")
+    print('*' * 50)
+
+    status19, info19 = commands.getstatusoutput("ssh 10.209.23.45 'ps -ef |grep kong|grep -v grep'")
+    if info19 == "":
+        print("外联区kong代理10.209.23.45服务异常")
+    else:
+        print("外联区kong代理10.209.23.45服务正常")
+    print('*' * 50)
+
+
+def es_health_examination():
+    """
+    通过连接es的集群 从es 的索引里面筛选出serversNameCn:
+    1:数据管理-元数据管理 2:数据管理-元数据查询
+    3:数据管理-数据权限管理 4:数据管理-数据权限查询
+    5:数据管理-数据质量规则配置 6:数据管理-数据质量分析
+    7:数据管理-数据血缘统计 8:数据管理-数据地图统计
+    message信息如果为“服务正常” 代表数据管理元数据管理容器内服务正常
+    message信息如果为“服务异常” 连续持续三分钟 代表数据管理元数据管理容器内服务异常
+
+    :return: 容器内服务是否正常
+    """
+    local_time = time.strftime("%Y-%m-%d")
+    time_y = local_time.split("-")[0][2:4]
+    time_m = local_time.split("-")[1]
+    time_s = local_time.split("-")[2]
+    time_str = time_y + time_m + time_s
+    index_name = "metric.service" + time_str   # 获取当天的索引
+    # index_name = "metric.service.201102"
+    index_type = "doc"
+    cluster_ip = ["10.209.33.68:9201”", "10.209.33.63:9201",
+                  "10.209.33.30:9201", "10.209.33.16:9201",
+                  "10.209.33.21:9201", "10.209.33.119:9201",
+                  "10.209.32.218:9201"]
+
+    query_json = {
+        "query": {
+            "bool": {
+                "must": [
+                    {
+                        "term": {
+                            "message": "服务异常"
+                        }
+                    },
+                    {
+                        "terms": {
+                            "serviceNameCn": ["数据管理-元数据管理", "数据管理-元数据查询",
+                                              "数据管理-数据权限管理 ", "数据管理-数据权限查询",
+                                              "数据管理-数据质量规则配置", "数据管理-数据质量分析",
+                                              "数据管理-数据血缘统计", "数据管理-数据地图统计"
+                                              ]
+                        }
+                    }
+                ]
+            }
+        }
+    }
+    es = Elasticsearch(cluster_ip)
+    res = es.search(index=index_name, body=query_json)
+    # 获取服务异常数据的总量
+    total = res["hits"]['total']
+    print("容器内服务异常的条数是%s"%total)
+    if total == 0:
+        print("容器内服务是正常的")
+    else:
+        print("请尽快检查容器内的服务")
+
+    print("数据管理服务全部检查完毕！请进行下一项检查")
+    print("*"*50)
+
+
+if __name__ == '__main__':
+    k8s_standard_examination()
+    k8s_enterprise_examination()
+    cvm_health_examination()
+    es_health_examination()
+
